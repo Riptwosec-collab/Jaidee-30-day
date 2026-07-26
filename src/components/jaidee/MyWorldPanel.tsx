@@ -1,6 +1,6 @@
 "use client";
 
-import { Home, Mail, PawPrint, Play, Seedling } from "lucide-react";
+import { Home, Mail, PawPrint, Play, Sprout } from "lucide-react";
 import { useMemo, useState } from "react";
 import { miniGames, petNameSuggestions, plantDefinitions, roomItems, starterPets, type PetDefinition, type PetId, type PlantDefinition, type ResourceKey } from "@/data/myWorld";
 import { addAchievement, rewardFromSelfCare, type GardenPlot, type MyWorldState, writeMyWorldState } from "@/lib/myWorldStorage";
@@ -245,7 +245,7 @@ export default function MyWorldPanel({ world, setWorld, onToast }: Props) {
 
       <div className="world-tabs segmented">
         <button className={section === "pet" ? "active" : ""} onClick={() => setSection("pet")}><PawPrint size={16} /> เพื่อน</button>
-        <button className={section === "garden" ? "active" : ""} onClick={() => setSection("garden")}><Seedling size={16} /> สวนใจ</button>
+        <button className={section === "garden" ? "active" : ""} onClick={() => setSection("garden")}><Sprout size={16} /> สวนใจ</button>
         <button className={section === "room" ? "active" : ""} onClick={() => setSection("room")}><Home size={16} /> บ้าน</button>
         <button className={section === "games" ? "active" : ""} onClick={() => setSection("games")}><Play size={16} /> เกม</button>
       </div>
