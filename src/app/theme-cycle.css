@@ -1,4 +1,4 @@
-/* Theme cycle visual system: one floating button controls the whole app. */
+/* Theme cycle visual system: fixed top controls change the whole app. */
 :root,
 body[data-theme="classic"] {
   --background: #f7dede;
@@ -176,46 +176,79 @@ body.dark .action-tile span:first-child {
   background: rgba(255, 255, 255, 0.12);
 }
 
-/* Old theme grid in the Me page is hidden because the floating button now controls all themes. */
+/* Old theme grid in the Me page is hidden because top theme button now controls all themes. */
 .theme-grid {
   display: none !important;
 }
 
-.theme-fab-wrap {
-  position: fixed;
-  right: max(14px, calc((100vw - 430px) / 2 + 14px));
-  top: max(14px, env(safe-area-inset-top));
-  z-index: 60;
+/* Old floating theme styles are disabled. */
+.theme-fab-wrap,
+.theme-fab {
+  display: none !important;
 }
 
-.theme-fab {
+.top-control-cluster {
+  position: fixed;
+  top: max(76px, calc(env(safe-area-inset-top) + 76px));
+  right: max(24px, calc((100vw - 430px) / 2 + 24px));
+  z-index: 62;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  pointer-events: auto;
+}
+
+.top-control-button {
   width: 52px;
   height: 52px;
   border-radius: 999px;
   border: 1px solid rgba(255, 255, 255, 0.32);
-  background: linear-gradient(145deg, rgba(115, 90, 176, 0.94), rgba(78, 60, 130, 0.96));
-  color: #ffffff;
+  background: rgba(255, 255, 255, 0.14);
+  color: #ffffff !important;
   display: grid;
   place-items: center;
-  box-shadow: 0 16px 32px rgba(55, 38, 95, 0.24);
-  backdrop-filter: blur(16px);
+  box-shadow: 0 16px 32px rgba(55, 38, 95, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(18px);
+  text-decoration: none;
 }
 
-.theme-fab svg {
+.theme-cycle-button {
+  background: linear-gradient(145deg, rgba(115, 90, 176, 0.96), rgba(78, 60, 130, 0.98));
+}
+
+.top-control-button svg {
   color: inherit !important;
   stroke-width: 2.35 !important;
 }
 
-body[data-theme="night"] .theme-fab,
-body.dark .theme-fab {
-  background: linear-gradient(145deg, rgba(78, 64, 124, 0.94), rgba(53, 44, 88, 0.98));
+body[data-theme="classic"] .top-control-button,
+body[data-theme="morning"] .top-control-button,
+body[data-theme="day"] .top-control-button,
+body[data-theme="evening"] .top-control-button {
+  color: var(--primary) !important;
+  background: rgba(255, 255, 255, 0.68);
+  border-color: var(--border);
+}
+
+body[data-theme="classic"] .theme-cycle-button,
+body[data-theme="morning"] .theme-cycle-button,
+body[data-theme="day"] .theme-cycle-button,
+body[data-theme="evening"] .theme-cycle-button {
+  color: #ffffff !important;
+  background: linear-gradient(145deg, rgba(115, 90, 176, 0.96), rgba(78, 60, 130, 0.98));
+}
+
+body[data-theme="night"] .top-control-button,
+body.dark .top-control-button {
+  background: rgba(255, 255, 255, 0.13);
+  border-color: rgba(255, 255, 255, 0.22);
 }
 
 .theme-fab-toast {
   position: fixed;
-  top: calc(max(14px, env(safe-area-inset-top)) + 60px);
-  right: max(14px, calc((100vw - 430px) / 2 + 14px));
-  z-index: 61;
+  top: max(136px, calc(env(safe-area-inset-top) + 136px));
+  right: max(24px, calc((100vw - 430px) / 2 + 24px));
+  z-index: 63;
   max-width: min(260px, calc(100vw - 28px));
   padding: 10px 14px;
   border-radius: 999px;
@@ -229,10 +262,10 @@ body.dark .theme-fab {
 }
 
 @media (max-width: 430px) {
-  .theme-fab-wrap {
-    right: 12px;
+  .top-control-cluster {
+    right: 18px;
   }
   .theme-fab-toast {
-    right: 12px;
+    right: 18px;
   }
 }
