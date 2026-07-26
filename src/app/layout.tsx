@@ -7,6 +7,7 @@ import "./readability.css";
 import "./nav-readability.css";
 import "./theme-cycle.css";
 import "./cloud-backup.css";
+import "./my-world.css";
 
 export const metadata: Metadata = {
   title: "ใจดี 30 วัน",
