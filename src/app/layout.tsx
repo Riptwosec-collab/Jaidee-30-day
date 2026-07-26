@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import GoogleDriveBackupPanel from "@/components/jaidee/GoogleDriveBackupPanel";
+import MyWorldGlobalAccess from "@/components/jaidee/MyWorldGlobalAccess";
 import ThemeBridge from "./ThemeBridge";
 import "./globals.css";
 import "./extras.css";
@@ -8,6 +9,7 @@ import "./nav-readability.css";
 import "./theme-cycle.css";
 import "./cloud-backup.css";
 import "./my-world.css";
+import "./my-world-access.css";
 
 export const metadata: Metadata = {
   title: "ใจดี 30 วัน",
@@ -27,6 +29,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="th">
       <body>
         {children}
+        <MyWorldGlobalAccess />
         <GoogleDriveBackupPanel />
         <ThemeBridge />
       </body>
