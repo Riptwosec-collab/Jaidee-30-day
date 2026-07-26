@@ -1,26 +1,25 @@
 "use client";
 
-import { AnimatePresence, motion } from "framer-motion";
-import { Home, Mail, PawPrint, Play, Seedling, Sparkles, Star, Utensils, Wand2, Waves } from "lucide-react";
+import { Home, Mail, PawPrint, Play, Seedling } from "lucide-react";
 import { useMemo, useState } from "react";
-import { miniGames, petNameSuggestions, plantDefinitions, roomItems, starterPets, type PetDefinition, type PlantDefinition } from "@/data/myWorld";
+import { miniGames, petNameSuggestions, plantDefinitions, roomItems, starterPets, type PetDefinition, type PetId, type PlantDefinition, type ResourceKey } from "@/data/myWorld";
 import { addAchievement, rewardFromSelfCare, type GardenPlot, type MyWorldState, writeMyWorldState } from "@/lib/myWorldStorage";
 
 type Props = {
   world: MyWorldState;
   setWorld: (world: MyWorldState) => void;
-  reduceMotion?: boolean;
   onToast?: (message: string) => void;
 };
 
 type WorldSection = "pet" | "garden" | "room" | "games";
+type PetAction = "pet" | "feed" | "play" | "quest" | "breathe";
 
-const resourceLabels = {
+const resourceLabels: Record<ResourceKey, { icon: string; label: string; help: string }> = {
   waterDrops: { icon: "💧", label: "หยดน้ำ", help: "ได้จาก Mood Check-in และเกมหายใจ ใช้รดต้นไม้" },
   kindStars: { icon: "⭐", label: "ดาวใจดี", help: "ได้จากภารกิจและมินิเกม ใช้ปลดล็อกของตกแต่ง" },
   friendshipHearts: { icon: "💗", label: "หัวใจมิตรภาพ", help: "ได้จากบันทึกและเล่นกับสัตว์ ใช้เพิ่มความสนิท" },
   seeds: { icon: "🌱", label: "เมล็ดพันธุ์", help: "ได้จาก Daily Reward และการเก็บเกี่ยว ใช้ปลูกสวน" },
-} as const;
+};
 
 const petQuests = [
   "ดื่มน้ำหนึ่งแก้วแล้วกลับมาบอกเรานะ",
@@ -41,26 +40,34 @@ function currentPet(world: MyWorldState): PetDefinition {
 
 function getPetLine(world: MyWorldState): string {
   const pet = currentPet(world);
-  const source = [pet.sampleLine, ...pet.lines];
-  return source[(world.petXp + world.petLevel) % source.length];
+  const lines = [pet.sampleLine, ...pet.lines];
+  return lines[(world.petXp + world.petLevel) % lines.length] ?? pet.sampleLine;
 }
 
 function stageIcon(plot: GardenPlot, plant?: PlantDefinition): string {
   if (!plot.plantId) return "＋";
   if (plot.readyToHarvest || plot.stage === 4) return plant?.icon ?? "🌿";
-  return ["▫️", "🌱", "🌿", "🪴", plant?.icon ?? "🌼"][plot.stage] ?? "🌱";
+  const stages = ["▫️", "🌱", "🌿", "🪴", plant?.icon ?? "🌼"];
+  return stages[plot.stage] ?? "🌱";
 }
 
-export default function MyWorldPanel({ world, setWorld, reduceMotion, onToast }: Props) {
+function rewardTypeForAction(kind: PetAction): "journal" | "mission" | "breathing" {
+  if (kind === "quest") return "mission";
+  if (kind === "breathe") return "breathing";
+  return "journal";
+}
+
+export default function MyWorldPanel({ world, setWorld, onToast }: Props) {
   const [section, setSection] = useState<WorldSection>("pet");
   const [onboardingStep, setOnboardingStep] = useState(0);
-  const [draftPetId, setDraftPetId] = useState(world.selectedPetId ?? starterPets[0].id);
+  const [draftPetId, setDraftPetId] = useState<PetId>(world.selectedPetId ?? starterPets[0].id);
   const [draftName, setDraftName] = useState(world.petName || "โมจิ");
+
   const pet = currentPet(world);
-  const petQuest = petQuests[new Date().getDate() % petQuests.length];
+  const petQuest = petQuests[new Date().getDate() % petQuests.length] ?? petQuests[0];
   const unreadMail = world.inbox.filter((mail) => !mail.read).length;
   const readyPlots = world.gardenPlots.filter((plot) => plot.readyToHarvest || plot.stage === 4).length;
-  const activePlant = useMemo(() => plantDefinitions[world.petXp % plantDefinitions.length], [world.petXp]);
+  const activePlant = useMemo(() => plantDefinitions[world.petXp % plantDefinitions.length] ?? plantDefinitions[0], [world.petXp]);
 
   function finishOnboarding() {
     const next = addAchievement({
@@ -73,9 +80,8 @@ export default function MyWorldPanel({ world, setWorld, reduceMotion, onToast }:
     onToast?.(`${next.petName} จะอยู่ข้างคุณเสมอ`);
   }
 
-  function updateStats(kind: "pet" | "feed" | "play" | "quest" | "breathe") {
-    const rewardType = kind === "quest" ? "mission" : kind === "breathe" ? "breathing" : "journal";
-    let next = rewardFromSelfCare(world, rewardType);
+  function updateStats(kind: PetAction) {
+    let next = rewardFromSelfCare(world, rewardTypeForAction(kind));
     next = {
       ...next,
       petStats: {
@@ -105,7 +111,10 @@ export default function MyWorldPanel({ world, setWorld, reduceMotion, onToast }:
 
   function waterPlot(plotId: string) {
     const plot = world.gardenPlots.find((item) => item.id === plotId);
-    if (!plot?.plantId) return plantSeed(plotId);
+    if (!plot?.plantId) {
+      plantSeed(plotId);
+      return;
+    }
     if (world.resources.waterDrops <= 0) {
       onToast?.("หยดน้ำยังไม่พอ ลองเลือกอารมณ์หรือฝึกหายใจก่อนนะ");
       return;
@@ -115,8 +124,8 @@ export default function MyWorldPanel({ world, setWorld, reduceMotion, onToast }:
       resources: { ...world.resources, waterDrops: world.resources.waterDrops - 1 },
       gardenPlots: world.gardenPlots.map((item) => {
         if (item.id !== plotId) return item;
-        const stage = Math.min(4, item.stage + 1) as GardenPlot["stage"];
-        return { ...item, water: item.water + 1, stage, readyToHarvest: stage === 4 };
+        const nextStage = Math.min(4, item.stage + 1) as GardenPlot["stage"];
+        return { ...item, water: item.water + 1, stage: nextStage, readyToHarvest: nextStage === 4 };
       }),
     };
     saveWorld(next, setWorld);
@@ -126,11 +135,20 @@ export default function MyWorldPanel({ world, setWorld, reduceMotion, onToast }:
   function harvestPlot(plotId: string) {
     const plot = world.gardenPlots.find((item) => item.id === plotId);
     const plant = plantDefinitions.find((item) => item.id === plot?.plantId);
-    if (!plot?.readyToHarvest || !plant) return waterPlot(plotId);
+    if (!plot?.readyToHarvest || !plant) {
+      waterPlot(plotId);
+      return;
+    }
+    const rewardType = plant.rewardType;
+    const nextResources = {
+      ...world.resources,
+      [rewardType]: world.resources[rewardType] + plant.rewardAmount,
+      seeds: world.resources.seeds + 1,
+    };
     const next: MyWorldState = {
       ...world,
       petXp: world.petXp + 16,
-      resources: { ...world.resources, [plant.rewardType]: world.resources[plant.rewardType] + plant.rewardAmount, seeds: world.resources.seeds + 1 },
+      resources: nextResources,
       gardenPlots: world.gardenPlots.map((item) => item.id === plotId ? { ...item, plantId: undefined, stage: 0, water: 0, sunlight: 0, readyToHarvest: false } : item),
     };
     saveWorld(addAchievement(next, "เก็บเกี่ยวครั้งแรก"), setWorld);
@@ -140,8 +158,9 @@ export default function MyWorldPanel({ world, setWorld, reduceMotion, onToast }:
   function playGame(gameId: string) {
     const game = miniGames.find((item) => item.id === gameId);
     const score = Math.floor(60 + Math.random() * 40);
+    const rewarded = rewardFromSelfCare(world, "mission");
     const next = addAchievement({
-      ...rewardFromSelfCare(world, "mission"),
+      ...rewarded,
       miniGameHighScores: { ...world.miniGameHighScores, [gameId]: Math.max(world.miniGameHighScores[gameId] ?? 0, score) },
     }, "เล่นมินิเกมครั้งแรก");
     saveWorld(next, setWorld);
@@ -212,13 +231,16 @@ export default function MyWorldPanel({ world, setWorld, reduceMotion, onToast }:
       </header>
 
       <div className="resource-bar glass">
-        {Object.entries(resourceLabels).map(([key, meta]) => (
-          <button key={key} className="resource-chip" title={meta.help}>
-            <span>{meta.icon}</span>
-            <strong>{world.resources[key as keyof typeof world.resources]}</strong>
-            <small>{meta.label}</small>
-          </button>
-        ))}
+        {(Object.keys(resourceLabels) as ResourceKey[]).map((key) => {
+          const meta = resourceLabels[key];
+          return (
+            <button key={key} className="resource-chip" title={meta.help}>
+              <span>{meta.icon}</span>
+              <strong>{world.resources[key]}</strong>
+              <small>{meta.label}</small>
+            </button>
+          );
+        })}
       </div>
 
       <div className="world-tabs segmented">
@@ -228,106 +250,106 @@ export default function MyWorldPanel({ world, setWorld, reduceMotion, onToast }:
         <button className={section === "games" ? "active" : ""} onClick={() => setSection("games")}><Play size={16} /> เกม</button>
       </div>
 
-      <AnimatePresence mode="wait">
-        {section === "pet" && (
-          <motion.section key="pet" className="space-y-4" initial={reduceMotion ? false : { opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}>
-            <article className={`pet-scene glass card ${pet.colorClass}`}>
-              <div className="scene-sun" />
-              <div className="scene-window">☁️</div>
-              <motion.button className="pet-avatar" onClick={() => updateStats("pet")} animate={reduceMotion ? undefined : { y: [0, -5, 0] }} transition={{ duration: 2.2, repeat: Infinity }}>
-                {pet.emoji}
-              </motion.button>
-              <div className="pet-speech">{getPetLine(world)}</div>
-              <div className="pet-level">Lv.{world.petLevel} · {world.petXp} XP</div>
-            </article>
+      {section === "pet" && (
+        <section className="space-y-4">
+          <article className={`pet-scene glass card ${pet.colorClass}`}>
+            <div className="scene-sun" />
+            <div className="scene-window">☁️</div>
+            <button className="pet-avatar" onClick={() => updateStats("pet")}>{pet.emoji}</button>
+            <div className="pet-speech">{getPetLine(world)}</div>
+            <div className="pet-level">Lv.{world.petLevel} · {world.petXp} XP</div>
+          </article>
 
-            <div className="pet-action-grid">
-              <button className="action-tile" onClick={() => updateStats("pet")}><span>💗</span><span>ลูบหัว</span></button>
-              <button className="action-tile" onClick={() => updateStats("feed")}><span>🍪</span><span>ให้อาหาร</span></button>
-              <button className="action-tile" onClick={() => updateStats("play")}><span>🫧</span><span>เล่นด้วย</span></button>
-              <button className="action-tile" onClick={() => onToast?.("ตู้เสื้อผ้าจะเปิดเต็มรูปแบบในอัปเกรดถัดไป") }><span>🎀</span><span>แต่งตัว</span></button>
-            </div>
+          <div className="pet-action-grid">
+            <button className="action-tile" onClick={() => updateStats("pet")}><span>💗</span><span>ลูบหัว</span></button>
+            <button className="action-tile" onClick={() => updateStats("feed")}><span>🍪</span><span>ให้อาหาร</span></button>
+            <button className="action-tile" onClick={() => updateStats("play")}><span>🫧</span><span>เล่นด้วย</span></button>
+            <button className="action-tile" onClick={() => onToast?.("ตู้เสื้อผ้าจะเปิดเต็มรูปแบบในอัปเกรดถัดไป")}><span>🎀</span><span>แต่งตัว</span></button>
+          </div>
 
-            <section className="glass card space-y-3">
-              <h3 className="text-lg font-black">ภารกิจจากเพื่อนตัวน้อย</h3>
-              <p className="soft-muted text-sm">{petQuest}</p>
-              <button className="primary-btn" onClick={() => updateStats("quest")}>ทำแล้ว รับรางวัลเล็ก ๆ</button>
-            </section>
+          <section className="glass card space-y-3">
+            <h3 className="text-lg font-black">ภารกิจจากเพื่อนตัวน้อย</h3>
+            <p className="soft-muted text-sm">{petQuest}</p>
+            <button className="primary-btn" onClick={() => updateStats("quest")}>ทำแล้ว รับรางวัลเล็ก ๆ</button>
+          </section>
 
-            <div className="grid grid-cols-2 gap-3">
-              {Object.entries(world.petStats).map(([key, value]) => (
-                <div key={key} className="glass card pet-stat-card">
-                  <small>{key}</small>
-                  <strong>{value}/100</strong>
-                  <span><i style={{ width: `${value}%` }} /></span>
-                </div>
+          <div className="grid grid-cols-2 gap-3">
+            {Object.entries(world.petStats).map(([key, value]) => (
+              <div key={key} className="glass card pet-stat-card">
+                <small>{key}</small>
+                <strong>{value}/100</strong>
+                <span><i style={{ width: `${value}%` }} /></span>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {section === "garden" && (
+        <section className="space-y-4">
+          <section className="glass card">
+            <h3 className="text-xl font-black">สวนใจของฉัน</h3>
+            <p className="soft-muted text-sm">พืชไม่ตาย ไม่เหี่ยวถาวร แค่ค่อย ๆ โตเมื่อคุณกลับมาดูแลใจ</p>
+            {readyPlots > 0 && <p className="reward-note">มีพืชพร้อมเก็บเกี่ยว {readyPlots} แปลง</p>}
+          </section>
+          <div className="garden-grid">
+            {world.gardenPlots.map((plot) => {
+              const plant = plantDefinitions.find((item) => item.id === plot.plantId);
+              return (
+                <button key={plot.id} className={`garden-plot ${plot.readyToHarvest ? "ready" : ""}`} onClick={() => plot.readyToHarvest ? harvestPlot(plot.id) : waterPlot(plot.id)}>
+                  <span>{stageIcon(plot, plant)}</span>
+                  <strong>{plant?.name ?? "แปลงว่าง"}</strong>
+                  <small>{plot.plantId ? `ระยะ ${plot.stage}/4` : "แตะเพื่อปลูก"}</small>
+                </button>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
+      {section === "room" && (
+        <section className="space-y-4">
+          <section className="room-scene glass card">
+            <div className="room-window">🌤️</div>
+            <div className="room-pet">{pet.emoji}</div>
+            <div className="room-rug" />
+            <p>{world.petName} นั่งพักอยู่ในบ้านเล็กของเรา</p>
+          </section>
+          <section className="glass card space-y-3">
+            <h3 className="text-xl font-black">ของตกแต่งที่ปลดล็อก</h3>
+            <div className="decor-grid">
+              {roomItems.map((item) => (
+                <button key={item} className={world.unlockedDecorations.includes(item) ? "unlocked" : "locked"} onClick={() => {
+                  if (!world.unlockedDecorations.includes(item)) {
+                    onToast?.("ของชิ้นนี้จะปลดล็อกจาก Level หรือ Achievement ถัดไป");
+                    return;
+                  }
+                  const equippedDecorations = world.equippedDecorations.includes(item) ? world.equippedDecorations.filter((decor) => decor !== item) : [...world.equippedDecorations, item];
+                  saveWorld({ ...world, equippedDecorations }, setWorld);
+                }}>{item}</button>
               ))}
             </div>
-          </motion.section>
-        )}
+          </section>
+        </section>
+      )}
 
-        {section === "garden" && (
-          <motion.section key="garden" className="space-y-4" initial={reduceMotion ? false : { opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}>
-            <section className="glass card">
-              <h3 className="text-xl font-black">สวนใจของฉัน</h3>
-              <p className="soft-muted text-sm">พืชไม่ตาย ไม่เหี่ยวถาวร แค่ค่อย ๆ โตเมื่อคุณกลับมาดูแลใจ</p>
-              {readyPlots > 0 && <p className="reward-note">มีพืชพร้อมเก็บเกี่ยว {readyPlots} แปลง</p>}
-            </section>
-            <div className="garden-grid">
-              {world.gardenPlots.map((plot) => {
-                const plant = plantDefinitions.find((item) => item.id === plot.plantId);
-                return (
-                  <button key={plot.id} className={`garden-plot ${plot.readyToHarvest ? "ready" : ""}`} onClick={() => plot.readyToHarvest ? harvestPlot(plot.id) : waterPlot(plot.id)}>
-                    <span>{stageIcon(plot, plant)}</span>
-                    <strong>{plant?.name ?? "แปลงว่าง"}</strong>
-                    <small>{plot.plantId ? `ระยะ ${plot.stage}/4` : "แตะเพื่อปลูก"}</small>
-                  </button>
-                );
-              })}
-            </div>
-          </motion.section>
-        )}
-
-        {section === "room" && (
-          <motion.section key="room" className="space-y-4" initial={reduceMotion ? false : { opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}>
-            <section className="room-scene glass card">
-              <div className="room-window">🌤️</div>
-              <div className="room-pet">{pet.emoji}</div>
-              <div className="room-rug" />
-              <p>{world.petName} นั่งพักอยู่ในบ้านเล็กของเรา</p>
-            </section>
-            <section className="glass card space-y-3">
-              <h3 className="text-xl font-black">ของตกแต่งที่ปลดล็อก</h3>
-              <div className="decor-grid">
-                {roomItems.map((item) => (
-                  <button key={item} className={world.unlockedDecorations.includes(item) ? "unlocked" : "locked"} onClick={() => {
-                    if (!world.unlockedDecorations.includes(item)) return onToast?.("ของชิ้นนี้จะปลดล็อกจาก Level หรือ Achievement ถัดไป");
-                    saveWorld({ ...world, equippedDecorations: world.equippedDecorations.includes(item) ? world.equippedDecorations.filter((decor) => decor !== item) : [...world.equippedDecorations, item] }, setWorld);
-                  }}>{item}</button>
-                ))}
-              </div>
-            </section>
-          </motion.section>
-        )}
-
-        {section === "games" && (
-          <motion.section key="games" className="space-y-3" initial={reduceMotion ? false : { opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}>
-            {miniGames.map((game) => (
-              <article key={game.id} className="glass card mini-game-card">
+      {section === "games" && (
+        <section className="space-y-3">
+          {miniGames.map((game) => (
+            <article key={game.id} className="glass card mini-game-card">
+              <div>
+                <span>{game.icon}</span>
                 <div>
-                  <span>{game.icon}</span>
-                  <div>
-                    <h3>{game.name}</h3>
-                    <p>{game.description}</p>
-                    <small>{game.type} · {game.duration} · {game.reward}</small>
-                  </div>
+                  <h3>{game.name}</h3>
+                  <p>{game.description}</p>
+                  <small>{game.type} · {game.duration} · {game.reward}</small>
                 </div>
-                <button className="primary-btn" onClick={() => playGame(game.id)}>เล่นแบบสบาย ๆ</button>
-              </article>
-            ))}
-          </motion.section>
-        )}
-      </AnimatePresence>
+              </div>
+              <button className="primary-btn" onClick={() => playGame(game.id)}>เล่นแบบสบาย ๆ</button>
+            </article>
+          ))}
+        </section>
+      )}
     </section>
   );
 }
