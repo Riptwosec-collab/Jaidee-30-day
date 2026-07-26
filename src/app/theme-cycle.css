@@ -1,0 +1,238 @@
+/* Theme cycle visual system: one floating button controls the whole app. */
+:root,
+body[data-theme="classic"] {
+  --background: #f7dede;
+  --background-secondary: #f8eff6;
+  --surface: rgba(255, 255, 255, 0.94);
+  --surface-soft: rgba(255, 255, 255, 0.86);
+  --surface-tile: rgba(255, 255, 255, 0.9);
+  --primary: #6e57bc;
+  --primary-soft: #efe8ff;
+  --secondary: #e77984;
+  --text-primary: #2a2138;
+  --text-secondary: #57506a;
+  --text-soft: #746d84;
+  --border: rgba(88, 76, 116, 0.16);
+  --shadow: rgba(76, 59, 112, 0.15);
+}
+
+body[data-theme="morning"] {
+  --background: #fff2e8;
+  --background-secondary: #f7ecff;
+  --surface: rgba(255, 255, 255, 0.95);
+  --surface-soft: rgba(255, 255, 255, 0.88);
+  --surface-tile: rgba(255, 255, 255, 0.91);
+  --primary: #6a58ba;
+  --primary-soft: #f2ecff;
+  --secondary: #ef9e7b;
+  --text-primary: #261d34;
+  --text-secondary: #5a5168;
+  --text-soft: #776e83;
+}
+
+body[data-theme="day"] {
+  --background: #edf5ff;
+  --background-secondary: #f7efff;
+  --surface: rgba(255, 255, 255, 0.95);
+  --surface-soft: rgba(255, 255, 255, 0.88);
+  --surface-tile: rgba(255, 255, 255, 0.91);
+  --primary: #5568c8;
+  --primary-soft: #e8efff;
+  --secondary: #84b7ef;
+  --text-primary: #1e2742;
+  --text-secondary: #515d78;
+  --text-soft: #717c93;
+}
+
+body[data-theme="evening"] {
+  --background: #ffe8dc;
+  --background-secondary: #f4e8ff;
+  --surface: rgba(255, 255, 255, 0.95);
+  --surface-soft: rgba(255, 255, 255, 0.88);
+  --surface-tile: rgba(255, 255, 255, 0.91);
+  --primary: #7c58c7;
+  --primary-soft: #f2e9ff;
+  --secondary: #f2a276;
+  --text-primary: #2c1f39;
+  --text-secondary: #60506c;
+  --text-soft: #7a6a82;
+}
+
+body[data-theme="night"] {
+  --background: #2a2442;
+  --background-secondary: #362d56;
+  --surface: rgba(255, 255, 255, 0.12);
+  --surface-soft: rgba(255, 255, 255, 0.14);
+  --surface-tile: rgba(255, 255, 255, 0.16);
+  --primary: #d8c9ff;
+  --primary-soft: rgba(255, 255, 255, 0.16);
+  --secondary: #ffc2c6;
+  --text-primary: #fffaff;
+  --text-secondary: #e8defa;
+  --text-soft: #cfc3e2;
+  --border: rgba(255, 255, 255, 0.18);
+  --shadow: rgba(0, 0, 0, 0.32);
+}
+
+body {
+  background:
+    radial-gradient(circle at top left, rgba(255, 255, 255, 0.36), transparent 28%),
+    linear-gradient(145deg, var(--background), var(--background-secondary)) !important;
+}
+
+.glass,
+.card,
+.soft-panel,
+.favorite-card,
+.summary-card,
+.stat-card,
+.badge-card,
+.bottom-sheet,
+.guide-card {
+  background: var(--surface) !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: 0 16px 36px var(--shadow) !important;
+  color: var(--text-primary) !important;
+}
+
+.mascot-card,
+.hero-art,
+.mission-card,
+.mini-stat,
+.action-tile,
+.day-cell,
+.input,
+.textarea,
+select.input,
+.segmented,
+.theme-grid button {
+  background: var(--surface-soft) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text-primary) !important;
+}
+
+.action-tile {
+  min-height: 96px;
+  border-radius: 28px !important;
+  box-shadow: 0 10px 24px var(--shadow) !important;
+}
+
+.action-tile span:first-child {
+  display: inline-grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  margin: 0 auto 6px;
+  border-radius: 999px;
+  background: var(--primary-soft);
+  color: var(--primary) !important;
+}
+
+.action-tile span:last-child,
+.mascot-card p,
+.mission-card p,
+.card p,
+.card small,
+.mini-stat small,
+.day-cell small {
+  color: var(--text-secondary) !important;
+  opacity: 1 !important;
+}
+
+.action-tile span:last-child {
+  color: var(--text-primary) !important;
+  font-weight: 950 !important;
+}
+
+.mascot-card {
+  border-radius: 34px !important;
+  gap: 14px;
+}
+
+.mascot-card .soft-btn,
+.soft-btn,
+.icon-btn {
+  background: var(--surface-tile) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text-primary) !important;
+  font-weight: 950 !important;
+}
+
+.primary-btn {
+  color: #fff !important;
+  background: linear-gradient(145deg, var(--primary), #8c73dc) !important;
+  border-radius: 999px !important;
+}
+
+body[data-theme="night"] .primary-btn,
+body.dark .primary-btn {
+  color: #231b3a !important;
+  background: linear-gradient(145deg, #f3eaff, #d8c8ff) !important;
+}
+
+body[data-theme="night"] .action-tile span:first-child,
+body.dark .action-tile span:first-child {
+  color: var(--text-primary) !important;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* Old theme grid in the Me page is hidden because the floating button now controls all themes. */
+.theme-grid {
+  display: none !important;
+}
+
+.theme-fab-wrap {
+  position: fixed;
+  right: max(14px, calc((100vw - 430px) / 2 + 14px));
+  top: max(14px, env(safe-area-inset-top));
+  z-index: 60;
+}
+
+.theme-fab {
+  width: 52px;
+  height: 52px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  background: linear-gradient(145deg, rgba(115, 90, 176, 0.94), rgba(78, 60, 130, 0.96));
+  color: #ffffff;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 16px 32px rgba(55, 38, 95, 0.24);
+  backdrop-filter: blur(16px);
+}
+
+.theme-fab svg {
+  color: inherit !important;
+  stroke-width: 2.35 !important;
+}
+
+body[data-theme="night"] .theme-fab,
+body.dark .theme-fab {
+  background: linear-gradient(145deg, rgba(78, 64, 124, 0.94), rgba(53, 44, 88, 0.98));
+}
+
+.theme-fab-toast {
+  position: fixed;
+  top: calc(max(14px, env(safe-area-inset-top)) + 60px);
+  right: max(14px, calc((100vw - 430px) / 2 + 14px));
+  z-index: 61;
+  max-width: min(260px, calc(100vw - 28px));
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  box-shadow: 0 12px 28px var(--shadow);
+  font-size: 13px;
+  font-weight: 900;
+  backdrop-filter: blur(18px);
+}
+
+@media (max-width: 430px) {
+  .theme-fab-wrap {
+    right: 12px;
+  }
+  .theme-fab-toast {
+    right: 12px;
+  }
+}
