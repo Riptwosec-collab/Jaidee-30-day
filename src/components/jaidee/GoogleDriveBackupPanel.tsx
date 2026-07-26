@@ -15,6 +15,7 @@ import {
   writeCloudBackupStatus,
   type GoogleDriveBackupStatus,
 } from "@/lib/googleDriveBackup";
+import { readMyWorldState, writeMyWorldState, type MyWorldState } from "@/lib/myWorldStorage";
 import {
   buildExportPayload,
   readDailyEntries,
@@ -24,18 +25,31 @@ import {
   writeDailyEntries,
   writeProfile,
   writeSettings,
+  type ExportPayload,
 } from "@/lib/storage";
+
+type JaideeCloudBackupPayload = ExportPayload & {
+  myWorld?: MyWorldState;
+};
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
 
 function createLocalSnapshot(): string {
   return JSON.stringify({
     profile: readProfile(),
     settings: readSettings(),
     dailyEntries: readDailyEntries(),
+    myWorld: readMyWorldState(),
   });
 }
 
-function createExportPayloadFromLocalStorage() {
-  return buildExportPayload(readProfile(), readSettings(), readDailyEntries());
+function createExportPayloadFromLocalStorage(): JaideeCloudBackupPayload {
+  return {
+    ...buildExportPayload(readProfile(), readSettings(), readDailyEntries()),
+    myWorld: readMyWorldState(),
+  };
 }
 
 export default function GoogleDriveBackupPanel() {
@@ -103,7 +117,7 @@ export default function GoogleDriveBackupPanel() {
       };
       persistStatus(nextStatus);
       lastSnapshotRef.current = createLocalSnapshot();
-      if (!options?.silent) setMessage("สำรองข้อมูลไปยัง Google Drive แล้ว");
+      if (!options?.silent) setMessage("สำรองข้อมูลไปยัง Google Drive แล้ว รวมข้อมูลโลกของฉันเรียบร้อย");
     } catch (err) {
       if (!options?.silent) setError(formatGoogleDriveError(err));
     } finally {
@@ -130,6 +144,9 @@ export default function GoogleDriveBackupPanel() {
       writeProfile(payload.profile);
       writeSettings(payload.settings);
       writeDailyEntries(payload.dailyEntries);
+      if (isRecord(raw) && isRecord(raw.myWorld)) {
+        writeMyWorldState(raw.myWorld as unknown as MyWorldState);
+      }
 
       const restoredAt = new Date().toISOString();
       persistStatus({
@@ -190,7 +207,7 @@ export default function GoogleDriveBackupPanel() {
             <button className="cloud-backup-close" onClick={() => setOpen(false)} aria-label="ปิด Cloud Backup"><X size={18} /></button>
           </div>
 
-          <p className="cloud-backup-note">ข้อมูลจะถูกสำรองเป็นไฟล์ JSON ใน Google Drive ของคุณเอง แอปนี้ไม่เก็บข้อมูลไว้บนเซิร์ฟเวอร์กลาง</p>
+          <p className="cloud-backup-note">ข้อมูลจะถูกสำรองเป็นไฟล์ JSON ใน Google Drive ของคุณเอง รวมบันทึก 30 วันและโลกของฉัน แอปนี้ไม่เก็บข้อมูลไว้บนเซิร์ฟเวอร์กลาง</p>
 
           <div className="cloud-backup-status-grid">
             <div><span>สถานะ</span><strong>{statusText}</strong></div>
