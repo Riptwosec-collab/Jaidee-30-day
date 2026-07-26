@@ -1,6 +1,6 @@
 # ใจดี 30 วัน
 
-เว็บแอป Mobile-first สำหรับรับกำลังใจวันละ 1 ชุด เป็นเวลา 30 วัน พร้อมภารกิจเล็ก ๆ, Mood Check-in, บันทึกใจ, ปฏิทิน, รายการโปรด, สถิติ, Badge, Share Card, Google Drive Cloud Backup และ PWA
+เว็บแอป Mobile-first สำหรับรับกำลังใจวันละ 1 ชุด เป็นเวลา 30 วัน พร้อมภารกิจเล็ก ๆ, Mood Check-in, บันทึกใจ, ปฏิทิน, รายการโปรด, สถิติ, Badge, Share Card, Google Drive Cloud Backup, ระบบโลกของฉัน และ PWA
 
 ## Tech Stack
 
@@ -40,16 +40,22 @@ jaidee-30-days/
       page.tsx
       globals.css
       cloud-backup.css
+      my-world.css
+      my-world-access.css
     components/
       jaidee/
         JaideeApp.tsx
         GoogleDriveBackupPanel.tsx
+        MyWorldGlobalAccess.tsx
+        MyWorldPanel.tsx
     data/
       encouragement.ts
+      myWorld.ts
     lib/
       dates.ts
       storage.ts
       googleDriveBackup.ts
+      myWorldStorage.ts
       shareCard.ts
 ```
 
@@ -81,6 +87,25 @@ npm run start
 4. Framework Preset: **Next.js**
 5. หากใช้ Google Drive Backup ให้เพิ่ม Environment Variable `NEXT_PUBLIC_GOOGLE_CLIENT_ID`
 6. กด Deploy
+
+## ระบบโลกของฉัน
+
+เพิ่มระบบใหม่ **โลกของฉัน** เป็นพื้นที่เล็ก ๆ ที่เติบโตขึ้นทุกครั้งที่ผู้ใช้ดูแลตัวเอง โดยไม่ลบหรือเปลี่ยนระบบ 30 วันเดิม
+
+ฟีเจอร์เวอร์ชันแรก:
+
+- Onboarding เลือกเพื่อนตัวน้อย 4 ตัว: ลูกหมา, แมว, แพนด้า, คาปิบาร่า
+- ตั้งชื่อสัตว์เลี้ยง พร้อมชื่อแนะนำ เช่น โมจิ มะลิ โกโก้ เมฆ มูน
+- Pet Dashboard พร้อม Level, XP, Speech Bubble และค่าสัตว์ด้านบวกเท่านั้น
+- Resource Bar: หยดน้ำ, ดาวใจดี, หัวใจมิตรภาพ, เมล็ดพันธุ์
+- สวนใจของฉัน: 4 แปลงเริ่มต้น ปลูก/รดน้ำ/เก็บเกี่ยวได้ พืชไม่ตายและไม่ลดระดับ
+- บ้านเล็กของเรา: preview ห้องและของตกแต่งที่ปลดล็อก
+- มินิเกมผ่อนคลาย 5 เกม: ดาวของวันนี้, เป่าปุยเมฆ, จัดมุมใจ, ครัวอบอุ่น, จับคู่ความรู้สึก
+- Inbox จดหมายต้อนรับและ Achievement เบื้องต้น
+- บันทึกข้อมูลถาวรใน LocalStorage key `kindheart30_my_world`
+- Google Drive Backup จะรวมข้อมูลโลกของฉันไว้ใน `jaidee-backup.json` ด้วย
+
+การออกแบบทำตามหลัก mobile-first, ใช้ safe area, bottom-sheet/drawer สำหรับมือถือ และ adaptive drawer สำหรับ tablet/desktop
 
 ## Google Drive Backup Setup
 
@@ -134,13 +159,17 @@ npm run dev
 - แอปขอ scope `https://www.googleapis.com/auth/drive.file`
 - Access token ถูกเก็บเฉพาะใน React state/memory ของ session ปัจจุบัน
 - ไม่บันทึก access token ลง LocalStorage
-- ไฟล์ backup ใช้ schema เดียวกับ Export/Import JSON เดิม
+- ไฟล์ backup ใช้ schema เดียวกับ Export/Import JSON เดิม และเพิ่ม field `myWorld` สำหรับข้อมูลโลกของฉัน
 
 ## ฟังก์ชันสำคัญอยู่ไฟล์ไหน
 
 | ฟังก์ชัน | ไฟล์ |
 |---|---|
 | Shell หลัก, Navigation, Today, Calendar, Journal, Stats, Settings | `src/components/jaidee/JaideeApp.tsx` |
+| โลกของฉัน Global Access | `src/components/jaidee/MyWorldGlobalAccess.tsx` |
+| โลกของฉัน Dashboard | `src/components/jaidee/MyWorldPanel.tsx` |
+| ข้อมูลสัตว์/สวน/บ้าน/มินิเกม | `src/data/myWorld.ts` |
+| LocalStorage และ migration ของโลกของฉัน | `src/lib/myWorldStorage.ts` |
 | Google Drive Backup UI | `src/components/jaidee/GoogleDriveBackupPanel.tsx` |
 | Google Drive OAuth/Drive API helper | `src/lib/googleDriveBackup.ts` |
 | ข้อมูลกำลังใจ 30 วัน | `src/data/encouragement.ts` |
@@ -149,6 +178,7 @@ npm run dev
 | Canvas Share Card | `src/lib/shareCard.ts` |
 | Theme, Mobile-first CSS, Safe Area, Breathing UI | `src/app/globals.css` |
 | Cloud Backup styles | `src/app/cloud-backup.css` |
+| My World styles | `src/app/my-world.css`, `src/app/my-world-access.css` |
 | PWA Manifest | `public/manifest.json` |
 | Offline Cache | `public/sw.js` |
 | Offline fallback | `public/offline.html` |
@@ -162,6 +192,7 @@ kindheart30_settings
 kindheart30_daily_entries
 kindheart30_onboarding
 kindheart30_cloud_backup_status
+kindheart30_my_world
 ```
 
 ## ตัวอย่างการทดสอบ
@@ -172,14 +203,18 @@ kindheart30_cloud_backup_status
 4. เขียนบันทึก แล้ว Refresh เพื่อเช็กว่าข้อมูลไม่หาย
 5. กด “ทำสำเร็จแล้ว” เพื่ออัปเดต Progress และ Calendar
 6. กดหัวใจเพื่อเพิ่มรายการโปรด
-7. ไปที่ “ตัวฉัน” → เปิด “โหมดทดลองดูครบ 30 วัน” เพื่อดูทุกวัน
-8. ทดสอบ Export / Import JSON
-9. กด Cloud → เชื่อมต่อ Google Drive → Backup Now
-10. ตรวจใน Google Drive ว่ามีโฟลเดอร์ `Jaidee 30 Days` และไฟล์ `jaidee-backup.json`
-11. ทดสอบ Restore from Google Drive
-12. กด “สร้างภาพแชร์” เพื่อดาวน์โหลด PNG
-13. ทดสอบ Add to Home Screen บนมือถือ
-14. ตรวจ GitHub Actions ว่า `npm run build` ผ่านหลัง push
+7. กดปุ่ม “โลกของฉัน” เหนือ bottom navigation
+8. เลือกสัตว์เริ่มต้นและตั้งชื่อ
+9. ทดสอบลูบหัว ให้อาหาร เล่นด้วย ปลูก/รดน้ำ/เก็บเกี่ยว และเล่นมินิเกม
+10. Refresh หน้า แล้วตรวจว่าโลกของฉันยังไม่หาย
+11. ไปที่ “ตัวฉัน” → เปิด “โหมดทดลองดูครบ 30 วัน” เพื่อดูทุกวัน
+12. ทดสอบ Export / Import JSON
+13. กด Cloud → เชื่อมต่อ Google Drive → Backup Now
+14. ตรวจใน Google Drive ว่ามีโฟลเดอร์ `Jaidee 30 Days` และไฟล์ `jaidee-backup.json`
+15. ทดสอบ Restore from Google Drive แล้วข้อมูลโลกของฉันกลับมาด้วย
+16. กด “สร้างภาพแชร์” เพื่อดาวน์โหลด PNG
+17. ทดสอบ Add to Home Screen บนมือถือ
+18. ตรวจ GitHub Actions ว่า `npm run build` ผ่านหลัง push
 
 ## CI
 
@@ -194,6 +229,7 @@ npm run build
 
 - ข้อมูลบันทึกถูกเก็บในเครื่องผู้ใช้ และสามารถสำรองไป Google Drive ของผู้ใช้เองได้
 - Import JSON และ Restore from Google Drive จะตรวจ `schemaVersion` ก่อนเขียนข้อมูลกลับเข้า LocalStorage
+- ระบบโลกของฉันใช้ค่าด้านบวกเท่านั้น ไม่มีการลงโทษ ไม่มีพืชตาย และไม่มีสัตว์เศร้า
 - Service Worker มี offline fallback สำหรับกรณีไม่มีอินเทอร์เน็ต
 - เสียงพื้นหลังเป็นตัวเลือก UI ในเวอร์ชันนี้ ยังไม่แนบไฟล์เสียงจริง เพื่อหลีกเลี่ยงการเปิดเสียงอัตโนมัติและลดขนาดโปรเจกต์
 - หาก Browser ไม่รองรับ Web Speech API หรือ Web Share API ระบบจะ fallback เป็นข้อความแจ้งหรือคัดลอกข้อความแทน
