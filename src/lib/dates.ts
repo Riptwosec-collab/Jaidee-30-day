@@ -1,4 +1,5 @@
 export type TimeTheme = "morning" | "day" | "evening" | "night";
+export type DisplayTheme = "classic" | TimeTheme;
 
 export function daysBetween(startDate: string, current = new Date()): number {
   const start = new Date(`${startDate}T00:00:00`);
@@ -38,9 +39,11 @@ export function getTimeGreeting(date = new Date()): string {
   return "คืนนี้วางทุกเรื่องลงก่อน แล้วพักให้เต็มที่นะ";
 }
 
-export function getThemeLabel(theme: TimeTheme): string {
-  if (theme === "morning") return "Sunrise Cream";
-  if (theme === "day") return "Soft Sky";
-  if (theme === "evening") return "Sunset Peach";
-  return "Lavender Night";
+export function getThemeLabel(theme: DisplayTheme | "auto"): string {
+  if (theme === "classic") return "ธีมดั้งเดิม";
+  if (theme === "auto") return "อัตโนมัติตามเวลา";
+  if (theme === "morning") return "เช้า · Sunrise Cream";
+  if (theme === "day") return "กลางวัน · Soft Sky";
+  if (theme === "evening") return "เย็น · Sunset Peach";
+  return "กลางคืน · Lavender Night";
 }
