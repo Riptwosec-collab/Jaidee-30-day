@@ -27,10 +27,11 @@ body {
   min-height: 100svh;
   color: var(--text-primary);
   background: radial-gradient(circle at top left, #ffe1d8 0, transparent 32%), radial-gradient(circle at 90% 0%, #dcd6ff 0, transparent 30%), linear-gradient(145deg, var(--background), var(--background-secondary));
-  font-family: "Noto Sans Thai", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: "Noto Sans Thai", "IBM Plex Sans Thai", "LINE Seed Sans TH", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 button, input, textarea, select { font: inherit; }
 button { cursor: pointer; }
+button:disabled { cursor: not-allowed; }
 textarea { resize: vertical; }
 
 .mobile-shell {
@@ -40,7 +41,7 @@ textarea { resize: vertical; }
   margin: 0 auto;
   position: relative;
   overflow-x: hidden;
-  padding: max(18px, env(safe-area-inset-top)) 16px calc(92px + env(safe-area-inset-bottom));
+  padding: max(18px, env(safe-area-inset-top)) 16px calc(104px + env(safe-area-inset-bottom));
 }
 
 .glass {
@@ -74,14 +75,32 @@ textarea { resize: vertical; }
   border: 1px solid var(--border);
   padding: 0 16px;
   font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 .icon-btn {
   min-width: 48px;
   padding: 0 14px;
   background: rgba(255,255,255,.72);
   border: 1px solid var(--border);
+  display: inline-grid;
+  place-items: center;
 }
 .primary-btn:active, .soft-btn:active, .icon-btn:active { transform: scale(.97); }
+
+.toast {
+  position: sticky;
+  top: max(8px, env(safe-area-inset-top));
+  z-index: 10;
+  margin-bottom: 14px;
+  border-radius: 999px;
+  padding: 10px 14px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  text-align: center;
+}
 
 .bottom-nav {
   position: fixed;
@@ -137,12 +156,13 @@ textarea { resize: vertical; }
 .mood-btn {
   border: 1px solid var(--border);
   border-radius: 22px;
-  min-height: 70px;
+  min-height: 72px;
   background: rgba(255,255,255,.66);
   display: grid;
   place-items: center;
   gap: 2px;
-  font-size: 13px;
+  font-size: 11px;
+  padding: 6px 3px;
 }
 .mood-btn.selected { border-color: var(--primary); background: rgba(131,116,232,.12); }
 
@@ -154,6 +174,10 @@ textarea { resize: vertical; }
   background: rgba(255,255,255,.72);
   color: var(--text-primary);
   outline: none;
+}
+.input:focus, .textarea:focus, button:focus-visible {
+  outline: 3px solid rgba(131,116,232,.24);
+  outline-offset: 2px;
 }
 .textarea { min-height: 120px; }
 
@@ -169,6 +193,39 @@ textarea { resize: vertical; }
   background: linear-gradient(90deg, var(--primary), var(--secondary), var(--accent));
 }
 
+.breathing-fab {
+  position: fixed;
+  right: max(18px, calc((100vw - 480px) / 2 + 18px));
+  bottom: calc(88px + env(safe-area-inset-bottom));
+  width: 58px;
+  height: 58px;
+  border: 0;
+  border-radius: 999px;
+  color: #fff;
+  background: linear-gradient(135deg, var(--success), var(--primary));
+  box-shadow: 0 18px 35px rgba(104,184,148,.35);
+  display: grid;
+  place-items: center;
+  z-index: 18;
+}
+.breathing-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(40, 35, 64, .48);
+  backdrop-filter: blur(18px);
+}
+.breathing-orb {
+  width: 170px;
+  height: 170px;
+  border-radius: 999px;
+  background: radial-gradient(circle at 35% 25%, #fff, var(--primary-light), var(--primary));
+  box-shadow: 0 24px 60px rgba(131,116,232,.35);
+}
+
 .dark {
   --background: #18162b;
   --background-secondary: #262044;
@@ -182,6 +239,24 @@ textarea { resize: vertical; }
 }
 .dark body, body.dark {
   background: radial-gradient(circle at top right, #423986 0, transparent 36%), radial-gradient(circle at 10% 10%, #57364d 0, transparent 25%), linear-gradient(145deg, var(--background), var(--background-secondary));
+}
+body.dark .bottom-nav { background: rgba(30, 24, 54, .78); }
+body.dark .soft-btn,
+body.dark .icon-btn,
+body.dark .input,
+body.dark .textarea,
+body.dark .day-cell,
+body.dark .mood-btn { background: rgba(255,255,255,.08); }
+
+@media (min-width: 700px) {
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 20px calc(50% - 260px);
+    border-radius: 36px;
+    border: 1px solid rgba(255,255,255,.45);
+    pointer-events: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
