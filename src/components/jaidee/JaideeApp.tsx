@@ -6,14 +6,9 @@ import {
   BookHeart,
   CalendarDays,
   Download,
-  Heart,
   Home,
   Moon,
   RefreshCcw,
-  Settings,
-  Share2,
-  Sparkles,
-  Star,
   UserRound,
   Volume2,
   Wind,
@@ -21,7 +16,7 @@ import {
 import { ChangeEvent, useEffect, useMemo, useState } from "react";
 import { encouragementDays, getEncouragementDay } from "@/data/encouragement";
 import { downloadDataUrl, createShareCard, type ShareCardSize } from "@/lib/shareCard";
-import { formatThaiDate, getTimeGreeting, getUnlockedDay } from "@/lib/dates";
+import { formatThaiDate, getUnlockedDay } from "@/lib/dates";
 import {
   buildExportPayload,
   createDefaultEntry,
@@ -238,7 +233,7 @@ export default function JaideeApp() {
         >
           <div className="text-7xl">♡</div>
           <h1 className="brand-title text-4xl font-black">ใจดี 30 วัน</h1>
-          <p className="soft-muted">ดูแลใจที่จะนิด ชีวิตจะใจดีกับคุณ</p>
+          <p className="soft-muted">ดูแลใจทีละนิด ชีวิตจะใจดีกับคุณ</p>
         </motion.div>
       </main>
     );
