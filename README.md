@@ -9,16 +9,18 @@
 - Tailwind CSS
 - Framer Motion
 - Lucide React
-- LocalStorage
+- LocalStorage พร้อม validation และ schema version
 - Web Speech API
 - Web Share API
 - Canvas Share Card
 - Service Worker + Web App Manifest
+- GitHub Actions CI
 
 ## โครงสร้างไฟล์หลัก
 
 ```text
 jaidee-30-days/
+  .github/workflows/ci.yml
   package.json
   next.config.ts
   tsconfig.json
@@ -27,19 +29,21 @@ jaidee-30-days/
   public/
     manifest.json
     sw.js
+    offline.html
     icons/
-      icon-192.png
-      icon-512.png
+      icon.svg
   src/
     app/
       layout.tsx
       page.tsx
       globals.css
     components/
-      KindHeartApp.tsx
+      jaidee/
+        JaideeApp.tsx
     data/
       encouragement.ts
     lib/
+      dates.ts
       storage.ts
       shareCard.ts
 ```
@@ -68,7 +72,7 @@ npm run start
 
 1. Push โปรเจกต์นี้ขึ้น GitHub
 2. เข้า Vercel แล้วกด **Add New Project**
-3. เลือก Repository `jaidee-30-days`
+3. เลือก Repository `Jaidee-30-day`
 4. Framework Preset: **Next.js**
 5. กด Deploy
 
@@ -78,23 +82,23 @@ npm run start
 
 | ฟังก์ชัน | ไฟล์ |
 |---|---|
-| หน้าหลักทั้งหมด, Navigation, Calendar, Journal, Stats, Settings | `src/components/KindHeartApp.tsx` |
+| Shell หลัก, Navigation, Today, Calendar, Journal, Stats, Settings | `src/components/jaidee/JaideeApp.tsx` |
 | ข้อมูลกำลังใจ 30 วัน | `src/data/encouragement.ts` |
-| LocalStorage, Data Model, Export Payload | `src/lib/storage.ts` |
+| LocalStorage, Data Model, Validation, Export/Import | `src/lib/storage.ts` |
+| Date unlock, Thai date, greeting | `src/lib/dates.ts` |
 | Canvas Share Card | `src/lib/shareCard.ts` |
-| Theme, Mobile-first CSS, Safe Area | `src/app/globals.css` |
+| Theme, Mobile-first CSS, Safe Area, Breathing UI | `src/app/globals.css` |
 | PWA Manifest | `public/manifest.json` |
 | Offline Cache | `public/sw.js` |
+| Offline fallback | `public/offline.html` |
+| Build check | `.github/workflows/ci.yml` |
 
 ## LocalStorage Keys
 
 ```ts
 kindheart30_profile
 kindheart30_settings
-kindheart30_progress
 kindheart30_daily_entries
-kindheart30_favorites
-kindheart30_achievements
 kindheart30_onboarding
 ```
 
@@ -106,14 +110,25 @@ kindheart30_onboarding
 4. เขียนบันทึก แล้ว Refresh เพื่อเช็กว่าข้อมูลไม่หาย
 5. กด “ทำสำเร็จแล้ว” เพื่ออัปเดต Progress และ Calendar
 6. กดหัวใจเพื่อเพิ่มรายการโปรด
-7. ไปที่ “ตัวฉัน” → “ข้อมูล” → เปิด “โหมดทดลองดูครบ 30 วัน” เพื่อดูทุกวัน
+7. ไปที่ “ตัวฉัน” → เปิด “โหมดทดลองดูครบ 30 วัน” เพื่อดูทุกวัน
 8. ทดสอบ Export / Import JSON
 9. กด “สร้างภาพแชร์” เพื่อดาวน์โหลด PNG
 10. ทดสอบ Add to Home Screen บนมือถือ
+11. ตรวจ GitHub Actions ว่า `npm run build` ผ่านหลัง push
+
+## CI
+
+ทุกครั้งที่ push เข้า `main` หรือเปิด Pull Request ระบบจะรัน:
+
+```bash
+npm install
+npm run build
+```
 
 ## หมายเหตุ
 
 - ข้อมูลบันทึกถูกเก็บในเครื่องผู้ใช้เท่านั้น ไม่ส่งขึ้น Server
-- Notification permission ขอสิทธิ์อย่างสุภาพ และไม่บันทึกข้อความส่วนตัวใน Notification
+- Import JSON จะตรวจ `schemaVersion` ก่อนเขียนข้อมูลกลับเข้า LocalStorage
+- Service Worker มี offline fallback สำหรับกรณีไม่มีอินเทอร์เน็ต
 - เสียงพื้นหลังเป็นตัวเลือก UI ในเวอร์ชันนี้ ยังไม่แนบไฟล์เสียงจริง เพื่อหลีกเลี่ยงการเปิดเสียงอัตโนมัติและลดขนาดโปรเจกต์
 - หาก Browser ไม่รองรับ Web Speech API หรือ Web Share API ระบบจะ fallback เป็นข้อความแจ้งหรือคัดลอกข้อความแทน
