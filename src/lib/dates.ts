@@ -1,6 +1,15 @@
 export type TimeTheme = "morning" | "day" | "evening" | "night";
 export type DisplayTheme = "classic" | TimeTheme;
 
+export const THEME_ORDER: DisplayTheme[] = ["classic", "morning", "day", "evening", "night"];
+
+export function getNextTheme(theme: DisplayTheme | "auto"): DisplayTheme {
+  if (theme === "auto") return "classic";
+  const index = THEME_ORDER.indexOf(theme);
+  if (index === -1) return "classic";
+  return THEME_ORDER[(index + 1) % THEME_ORDER.length];
+}
+
 export function daysBetween(startDate: string, current = new Date()): number {
   const start = new Date(`${startDate}T00:00:00`);
   const now = new Date(current.getFullYear(), current.getMonth(), current.getDate());
