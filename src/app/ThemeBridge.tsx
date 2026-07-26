@@ -1,6 +1,7 @@
 "use client";
 
-import { Moon, Sparkles, Sun, Sunrise, Sunset } from "lucide-react";
+import Link from "next/link";
+import { BookOpen, Moon, Sparkles, Sun, Sunrise, Sunset } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getNextTheme, getThemeLabel, getTimeTheme, type DisplayTheme } from "@/lib/dates";
 import { STORAGE_KEYS, type ThemeMode } from "@/lib/storage";
@@ -75,8 +76,11 @@ export default function ThemeBridge() {
 
   return (
     <>
-      <div className="theme-fab-wrap" aria-label="เปลี่ยนธีม">
-        <button className="theme-fab" onClick={cycleTheme} aria-label="เปลี่ยนธีม" title={getThemeLabel(resolvedTheme)}>
+      <div className="top-control-cluster" aria-label="คู่มือและเปลี่ยนธีม">
+        <Link className="top-control-button" href="/guide" aria-label="เปิดคู่มือการใช้งาน" title="คู่มือการใช้งาน">
+          <BookOpen size={18} />
+        </Link>
+        <button className="top-control-button theme-cycle-button" onClick={cycleTheme} aria-label="เปลี่ยนธีม" title={getThemeLabel(resolvedTheme)}>
           <ThemeIcon theme={resolvedTheme} />
         </button>
       </div>
