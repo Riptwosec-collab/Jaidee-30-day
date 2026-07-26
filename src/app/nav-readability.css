@@ -1,0 +1,238 @@
+/* Final readability override for bottom navigation, inactive buttons, captions, placeholders, legends, and micro text. */
+:root,
+body[data-theme="classic"] {
+  --nav-text: #4b435d;
+  --nav-text-strong: #201838;
+  --nav-active-bg: linear-gradient(145deg, #7658c8, #8e72dc);
+  --nav-active-text: #ffffff;
+  --readable-chip-bg: rgba(255, 255, 255, 0.94);
+  --readable-chip-border: rgba(75, 67, 93, 0.18);
+}
+
+body[data-theme="morning"] {
+  --nav-text: #4c425b;
+  --nav-text-strong: #211733;
+  --readable-chip-bg: rgba(255, 255, 255, 0.95);
+  --readable-chip-border: rgba(76, 66, 91, 0.18);
+}
+
+body[data-theme="day"] {
+  --nav-text: #37445c;
+  --nav-text-strong: #172039;
+  --readable-chip-bg: rgba(255, 255, 255, 0.95);
+  --readable-chip-border: rgba(55, 68, 92, 0.18);
+}
+
+body[data-theme="evening"] {
+  --nav-text: #4f3c55;
+  --nav-text-strong: #24172e;
+  --readable-chip-bg: rgba(255, 255, 255, 0.95);
+  --readable-chip-border: rgba(79, 60, 85, 0.18);
+}
+
+body[data-theme="night"],
+body.dark {
+  --nav-text: #f1e9ff;
+  --nav-text-strong: #ffffff;
+  --nav-active-bg: linear-gradient(145deg, #f3eaff, #d8c8ff);
+  --nav-active-text: #231b3a;
+  --readable-chip-bg: rgba(255, 255, 255, 0.13);
+  --readable-chip-border: rgba(255, 255, 255, 0.22);
+}
+
+body,
+p,
+span,
+div,
+label,
+small,
+li,
+input,
+textarea,
+select,
+button {
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Do not fade actual text. Use readable colors instead of opacity. */
+.soft-muted,
+.text-\[var\(--text-secondary\)\],
+.text-\[var\(--text-soft\)\],
+small,
+.toast,
+.calendar-legend,
+.mini-stat small,
+.badge-card small,
+.stat-card small,
+.action-tile span:last-child,
+.day-cell small,
+.guide-card p,
+.guide-list li,
+.theme-bridge-panel small {
+  color: var(--text-secondary) !important;
+  opacity: 1 !important;
+}
+
+.input::placeholder,
+.textarea::placeholder,
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-soft) !important;
+  opacity: 1 !important;
+}
+
+/* Bottom navigation: fix unreadable inactive items. */
+.bottom-nav {
+  background: rgba(255, 250, 245, 0.96) !important;
+  border-top: 1px solid var(--readable-chip-border) !important;
+  box-shadow: 0 -14px 36px rgba(62, 46, 94, 0.12) !important;
+}
+
+body[data-theme="night"] .bottom-nav,
+body.dark .bottom-nav {
+  background: rgba(27, 22, 43, 0.96) !important;
+  border-top-color: rgba(255, 255, 255, 0.18) !important;
+}
+
+.nav-item {
+  color: var(--nav-text) !important;
+  opacity: 1 !important;
+  font-weight: 900 !important;
+  letter-spacing: -0.01em;
+  background: transparent !important;
+}
+
+.nav-item span,
+.nav-item svg {
+  color: inherit !important;
+  opacity: 1 !important;
+}
+
+.nav-item svg {
+  stroke-width: 2.35 !important;
+}
+
+.nav-item.active {
+  color: var(--nav-active-text) !important;
+  background: var(--nav-active-bg) !important;
+  box-shadow: 0 12px 24px rgba(111, 87, 189, 0.26) !important;
+}
+
+.nav-item.active span,
+.nav-item.active svg {
+  color: inherit !important;
+}
+
+/* Buttons, chips, segmented tabs, theme buttons. */
+.soft-btn,
+.icon-btn,
+.theme-bridge-button,
+.theme-bridge-guide,
+.segmented button,
+.theme-grid button,
+.theme-bridge-grid button,
+.avatar-choice {
+  color: var(--text-primary) !important;
+  opacity: 1 !important;
+  background: var(--readable-chip-bg) !important;
+  border-color: var(--readable-chip-border) !important;
+}
+
+.segmented button,
+.theme-grid button,
+.theme-bridge-grid button {
+  font-weight: 900 !important;
+}
+
+.segmented button.active,
+.theme-grid button.active,
+.theme-bridge-grid button.active {
+  color: #ffffff !important;
+  background: linear-gradient(145deg, #7658c8, #8d73dc) !important;
+  border-color: transparent !important;
+}
+
+body[data-theme="night"] .segmented button.active,
+body[data-theme="night"] .theme-grid button.active,
+body[data-theme="night"] .theme-bridge-grid button.active,
+body.dark .segmented button.active,
+body.dark .theme-grid button.active,
+body.dark .theme-bridge-grid button.active {
+  color: #241c3d !important;
+  background: linear-gradient(145deg, #f1e8ff, #d8c8ff) !important;
+}
+
+.segmented button.active *,
+.theme-grid button.active *,
+.theme-bridge-grid button.active * {
+  color: inherit !important;
+  opacity: 1 !important;
+}
+
+/* Cards and controls that used to blend into pastel backgrounds. */
+.input,
+.textarea,
+select.input,
+.glass,
+.card,
+.action-tile,
+.stat-card,
+.badge-card,
+.favorite-card,
+.summary-card,
+.bottom-sheet,
+.mini-stat,
+.day-cell,
+.mood-btn {
+  color: var(--text-primary) !important;
+}
+
+.action-tile span:first-child,
+.mini-stat span,
+.badge-card span {
+  opacity: 1 !important;
+}
+
+.day-cell.locked,
+.badge-card.locked {
+  opacity: 0.82 !important;
+  color: var(--text-secondary) !important;
+  filter: none !important;
+}
+
+.day-cell.locked small,
+.badge-card.locked small {
+  color: var(--text-soft) !important;
+  opacity: 1 !important;
+}
+
+/* Labels and micro UI text. */
+label,
+.toggle-label,
+section label,
+.toggle-row,
+.toggle-row span,
+.theme-bridge-kicker {
+  color: var(--text-primary) !important;
+  opacity: 1 !important;
+}
+
+.page-dot {
+  opacity: 1 !important;
+  background: rgba(95, 71, 178, 0.34) !important;
+}
+
+.page-dot.active {
+  background: #6f57bd !important;
+}
+
+body[data-theme="night"] .page-dot,
+body.dark .page-dot {
+  background: rgba(255, 255, 255, 0.32) !important;
+}
+
+body[data-theme="night"] .page-dot.active,
+body.dark .page-dot.active {
+  background: #f1e8ff !important;
+}
