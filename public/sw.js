@@ -1,5 +1,5 @@
-const CACHE_NAME = "jaidee-30-days-v1";
-const APP_SHELL = ["/", "/manifest.json", "/icons/icon.svg"];
+const CACHE_NAME = "jaidee-30-days-v2";
+const APP_SHELL = ["/", "/manifest.json", "/icons/icon.svg", "/offline.html"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL)));
@@ -15,13 +15,21 @@ self.addEventListener("activate", (event) => {
 
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
+
+  const request = event.request;
+  const isNavigation = request.mode === "navigate";
+
   event.respondWith(
-    caches.match(event.request).then((cached) => {
-      return cached || fetch(event.request).then((response) => {
-        const copy = response.clone();
-        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
-        return response;
-      }).catch(() => caches.match("/"));
+    caches.match(request).then((cached) => {
+      if (cached) return cached;
+      return fetch(request)
+        .then((response) => {
+          if (!response || response.status !== 200 || response.type === "opaque") return response;
+          const copy = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
+          return response;
+        })
+        .catch(() => caches.match(isNavigation ? "/offline.html" : "/"));
     })
   );
 });
