@@ -4,6 +4,7 @@ import "./globals.css";
 import "./extras.css";
 import "./readability.css";
 import "./nav-readability.css";
+import "./theme-cycle.css";
 
 export const metadata: Metadata = {
   title: "ใจดี 30 วัน",
