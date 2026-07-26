@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
+import ThemeBridge from "./ThemeBridge";
 import "./globals.css";
 import "./extras.css";
+import "./readability.css";
 
 export const metadata: Metadata = {
   title: "ใจดี 30 วัน",
@@ -18,7 +20,10 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="th">
-      <body>{children}</body>
+      <body>
+        {children}
+        <ThemeBridge />
+      </body>
     </html>
   );
 }
