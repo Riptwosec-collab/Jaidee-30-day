@@ -60,6 +60,25 @@ export const DEFAULT_SETTINGS: UserSettings = {
   demoMode: false,
 };
 
+function canUseStorage(): boolean {
+  return typeof window !== "undefined" && typeof window.localStorage !== "undefined";
+}
+
+function getStorageItem(key: string): string | null {
+  if (!canUseStorage()) return null;
+  return window.localStorage.getItem(key);
+}
+
+function setStorageItem(key: string, value: string): void {
+  if (!canUseStorage()) return;
+  window.localStorage.setItem(key, value);
+}
+
+function removeStorageItem(key: string): void {
+  if (!canUseStorage()) return;
+  window.localStorage.removeItem(key);
+}
+
 export function todayKey(date = new Date()): string {
   return date.toISOString().slice(0, 10);
 }
@@ -100,7 +119,7 @@ function safeParse<T>(raw: string | null, fallback: T, validate: (value: unknown
 }
 
 export function readProfile(): UserProfile {
-  return safeParse(localStorage.getItem(STORAGE_KEYS.profile), createDefaultProfile(), (value) => {
+  return safeParse(getStorageItem(STORAGE_KEYS.profile), createDefaultProfile(), (value) => {
     if (!isRecord(value)) return createDefaultProfile();
     const fallback = createDefaultProfile();
     return {
@@ -113,7 +132,7 @@ export function readProfile(): UserProfile {
 }
 
 export function readSettings(): UserSettings {
-  return safeParse(localStorage.getItem(STORAGE_KEYS.settings), DEFAULT_SETTINGS, (value) => {
+  return safeParse(getStorageItem(STORAGE_KEYS.settings), DEFAULT_SETTINGS, (value) => {
     if (!isRecord(value)) return DEFAULT_SETTINGS;
     const allowedThemes: ThemeMode[] = ["auto", "morning", "day", "evening", "night"];
     return {
@@ -132,7 +151,7 @@ export function readSettings(): UserSettings {
 }
 
 export function readDailyEntries(): Record<number, DailyEntry> {
-  return safeParse<Record<number, DailyEntry>>(localStorage.getItem(STORAGE_KEYS.dailyEntries), {}, (value) => {
+  return safeParse<Record<number, DailyEntry>>(getStorageItem(STORAGE_KEYS.dailyEntries), {}, (value) => {
     if (!isRecord(value)) return {};
     return Object.entries(value).reduce<Record<number, DailyEntry>>((acc, [key, entry]) => {
       const day = Number(key);
@@ -156,27 +175,27 @@ export function readDailyEntries(): Record<number, DailyEntry> {
 }
 
 export function writeProfile(profile: UserProfile): void {
-  localStorage.setItem(STORAGE_KEYS.profile, JSON.stringify(profile));
+  setStorageItem(STORAGE_KEYS.profile, JSON.stringify(profile));
 }
 
 export function writeSettings(settings: UserSettings): void {
-  localStorage.setItem(STORAGE_KEYS.settings, JSON.stringify(settings));
+  setStorageItem(STORAGE_KEYS.settings, JSON.stringify(settings));
 }
 
 export function writeDailyEntries(entries: Record<number, DailyEntry>): void {
-  localStorage.setItem(STORAGE_KEYS.dailyEntries, JSON.stringify(entries));
+  setStorageItem(STORAGE_KEYS.dailyEntries, JSON.stringify(entries));
 }
 
 export function readOnboardingDone(): boolean {
-  return localStorage.getItem(STORAGE_KEYS.onboarding) === "done";
+  return getStorageItem(STORAGE_KEYS.onboarding) === "done";
 }
 
 export function writeOnboardingDone(): void {
-  localStorage.setItem(STORAGE_KEYS.onboarding, "done");
+  setStorageItem(STORAGE_KEYS.onboarding, "done");
 }
 
 export function resetAllData(): void {
-  Object.values(STORAGE_KEYS).forEach((key) => localStorage.removeItem(key));
+  Object.values(STORAGE_KEYS).forEach((key) => removeStorageItem(key));
 }
 
 export function buildExportPayload(profile: UserProfile, settings: UserSettings, dailyEntries: Record<number, DailyEntry>): ExportPayload {
