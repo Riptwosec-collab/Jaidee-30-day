@@ -2,18 +2,30 @@
   "name": "ใจดี 30 วัน",
   "short_name": "ใจดี30",
   "description": "วันละหนึ่งกำลังใจ เพื่อกลับมารักและดูแลตัวเองอีกครั้ง",
+  "id": "/",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "background_color": "#fff9f5",
   "theme_color": "#8374e8",
   "orientation": "portrait-primary",
+  "categories": ["health", "lifestyle", "productivity"],
+  "lang": "th",
   "icons": [
     {
       "src": "/icons/icon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "กำลังใจวันนี้",
+      "short_name": "วันนี้",
+      "description": "เปิดข้อความกำลังใจของวันนี้",
+      "url": "/",
+      "icons": [{ "src": "/icons/icon.svg", "sizes": "any" }]
     }
   ]
 }
