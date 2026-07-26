@@ -1,6 +1,6 @@
 # ใจดี 30 วัน
 
-เว็บแอป Mobile-first สำหรับรับกำลังใจวันละ 1 ชุด เป็นเวลา 30 วัน พร้อมภารกิจเล็ก ๆ, Mood Check-in, บันทึกใจ, ปฏิทิน, รายการโปรด, สถิติ, Badge, Share Card และ PWA
+เว็บแอป Mobile-first สำหรับรับกำลังใจวันละ 1 ชุด เป็นเวลา 30 วัน พร้อมภารกิจเล็ก ๆ, Mood Check-in, บันทึกใจ, ปฏิทิน, รายการโปรด, สถิติ, Badge, Share Card, Google Drive Cloud Backup และ PWA
 
 ## Tech Stack
 
@@ -10,6 +10,7 @@
 - Framer Motion
 - Lucide React
 - LocalStorage พร้อม validation และ schema version
+- Google Identity Services + Google Drive API v3 สำหรับ Cloud Backup แบบไฟล์ปกติ
 - Web Speech API
 - Web Share API
 - Canvas Share Card
@@ -21,6 +22,7 @@
 ```text
 jaidee-30-days/
   .github/workflows/ci.yml
+  .env.example
   package.json
   next.config.ts
   tsconfig.json
@@ -37,14 +39,17 @@ jaidee-30-days/
       layout.tsx
       page.tsx
       globals.css
+      cloud-backup.css
     components/
       jaidee/
         JaideeApp.tsx
+        GoogleDriveBackupPanel.tsx
     data/
       encouragement.ts
     lib/
       dates.ts
       storage.ts
+      googleDriveBackup.ts
       shareCard.ts
 ```
 
@@ -74,20 +79,76 @@ npm run start
 2. เข้า Vercel แล้วกด **Add New Project**
 3. เลือก Repository `Jaidee-30-day`
 4. Framework Preset: **Next.js**
-5. กด Deploy
+5. หากใช้ Google Drive Backup ให้เพิ่ม Environment Variable `NEXT_PUBLIC_GOOGLE_CLIENT_ID`
+6. กด Deploy
 
-ไม่ต้องตั้งค่า Environment Variables เพราะเวอร์ชันนี้ใช้ LocalStorage และไม่มี Backend
+## Google Drive Backup Setup
+
+ระบบ Cloud Backup ใช้ Google Drive ของผู้ใช้แต่ละคนโดยตรง และสร้างไฟล์ที่ผู้ใช้เห็นได้ใน Drive:
+
+```text
+Google Drive/
+  Jaidee 30 Days/
+    jaidee-backup.json
+```
+
+### 1. สร้าง OAuth Client ID
+
+1. เข้า Google Cloud Console
+2. สร้างหรือเลือก Project
+3. ไปที่ **APIs & Services → Library**
+4. เปิดใช้งาน **Google Drive API**
+5. ไปที่ **APIs & Services → Credentials**
+6. สร้าง **OAuth Client ID** ชนิด **Web application**
+7. เพิ่ม Authorized JavaScript origins เช่น:
+
+```text
+http://localhost:3000
+https://your-vercel-domain.vercel.app
+```
+
+8. คัดลอก Client ID มาใส่ใน `.env.local`
+
+```bash
+NEXT_PUBLIC_GOOGLE_CLIENT_ID=your-google-oauth-client-id.apps.googleusercontent.com
+```
+
+9. Restart dev server
+
+```bash
+npm run dev
+```
+
+### 2. วิธีใช้งานในแอป
+
+1. กดปุ่ม Cloud ด้านบนของแอป
+2. กด **เชื่อมต่อ Google Drive**
+3. กด **Backup Now** เพื่อสร้าง/อัปเดตไฟล์ `jaidee-backup.json`
+4. กด **Restore from Google Drive** เพื่อดึงข้อมูลกลับเข้า LocalStorage
+5. เปิด **Auto Backup** ได้หลังเชื่อมต่อ Google Drive แล้ว
+
+### 3. Privacy
+
+- แอปไม่ใช้ database กลางสำหรับ Cloud Backup
+- ข้อมูล backup ถูกเก็บใน Google Drive ของผู้ใช้นั้น ๆ
+- แอปขอ scope `https://www.googleapis.com/auth/drive.file`
+- Access token ถูกเก็บเฉพาะใน React state/memory ของ session ปัจจุบัน
+- ไม่บันทึก access token ลง LocalStorage
+- ไฟล์ backup ใช้ schema เดียวกับ Export/Import JSON เดิม
 
 ## ฟังก์ชันสำคัญอยู่ไฟล์ไหน
 
 | ฟังก์ชัน | ไฟล์ |
 |---|---|
 | Shell หลัก, Navigation, Today, Calendar, Journal, Stats, Settings | `src/components/jaidee/JaideeApp.tsx` |
+| Google Drive Backup UI | `src/components/jaidee/GoogleDriveBackupPanel.tsx` |
+| Google Drive OAuth/Drive API helper | `src/lib/googleDriveBackup.ts` |
 | ข้อมูลกำลังใจ 30 วัน | `src/data/encouragement.ts` |
 | LocalStorage, Data Model, Validation, Export/Import | `src/lib/storage.ts` |
 | Date unlock, Thai date, greeting | `src/lib/dates.ts` |
 | Canvas Share Card | `src/lib/shareCard.ts` |
 | Theme, Mobile-first CSS, Safe Area, Breathing UI | `src/app/globals.css` |
+| Cloud Backup styles | `src/app/cloud-backup.css` |
 | PWA Manifest | `public/manifest.json` |
 | Offline Cache | `public/sw.js` |
 | Offline fallback | `public/offline.html` |
@@ -100,6 +161,7 @@ kindheart30_profile
 kindheart30_settings
 kindheart30_daily_entries
 kindheart30_onboarding
+kindheart30_cloud_backup_status
 ```
 
 ## ตัวอย่างการทดสอบ
@@ -112,9 +174,12 @@ kindheart30_onboarding
 6. กดหัวใจเพื่อเพิ่มรายการโปรด
 7. ไปที่ “ตัวฉัน” → เปิด “โหมดทดลองดูครบ 30 วัน” เพื่อดูทุกวัน
 8. ทดสอบ Export / Import JSON
-9. กด “สร้างภาพแชร์” เพื่อดาวน์โหลด PNG
-10. ทดสอบ Add to Home Screen บนมือถือ
-11. ตรวจ GitHub Actions ว่า `npm run build` ผ่านหลัง push
+9. กด Cloud → เชื่อมต่อ Google Drive → Backup Now
+10. ตรวจใน Google Drive ว่ามีโฟลเดอร์ `Jaidee 30 Days` และไฟล์ `jaidee-backup.json`
+11. ทดสอบ Restore from Google Drive
+12. กด “สร้างภาพแชร์” เพื่อดาวน์โหลด PNG
+13. ทดสอบ Add to Home Screen บนมือถือ
+14. ตรวจ GitHub Actions ว่า `npm run build` ผ่านหลัง push
 
 ## CI
 
@@ -127,8 +192,8 @@ npm run build
 
 ## หมายเหตุ
 
-- ข้อมูลบันทึกถูกเก็บในเครื่องผู้ใช้เท่านั้น ไม่ส่งขึ้น Server
-- Import JSON จะตรวจ `schemaVersion` ก่อนเขียนข้อมูลกลับเข้า LocalStorage
+- ข้อมูลบันทึกถูกเก็บในเครื่องผู้ใช้ และสามารถสำรองไป Google Drive ของผู้ใช้เองได้
+- Import JSON และ Restore from Google Drive จะตรวจ `schemaVersion` ก่อนเขียนข้อมูลกลับเข้า LocalStorage
 - Service Worker มี offline fallback สำหรับกรณีไม่มีอินเทอร์เน็ต
 - เสียงพื้นหลังเป็นตัวเลือก UI ในเวอร์ชันนี้ ยังไม่แนบไฟล์เสียงจริง เพื่อหลีกเลี่ยงการเปิดเสียงอัตโนมัติและลดขนาดโปรเจกต์
 - หาก Browser ไม่รองรับ Web Speech API หรือ Web Share API ระบบจะ fallback เป็นข้อความแจ้งหรือคัดลอกข้อความแทน
