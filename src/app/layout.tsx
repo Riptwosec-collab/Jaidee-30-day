@@ -3,6 +3,7 @@ import ThemeBridge from "./ThemeBridge";
 import "./globals.css";
 import "./extras.css";
 import "./readability.css";
+import "./nav-readability.css";
 
 export const metadata: Metadata = {
   title: "ใจดี 30 วัน",
