@@ -7,7 +7,7 @@ export const STORAGE_KEYS = {
   onboarding: "kindheart30_onboarding",
 } as const;
 
-export type ThemeMode = "auto" | "morning" | "day" | "evening" | "night";
+export type ThemeMode = "classic" | "auto" | "morning" | "day" | "evening" | "night";
 
 export type UserProfile = {
   name: string;
@@ -49,7 +49,7 @@ export type ExportPayload = {
 };
 
 export const DEFAULT_SETTINGS: UserSettings = {
-  themeMode: "auto",
+  themeMode: "classic",
   darkMode: false,
   fontScale: 1,
   soundEnabled: false,
@@ -134,7 +134,7 @@ export function readProfile(): UserProfile {
 export function readSettings(): UserSettings {
   return safeParse(getStorageItem(STORAGE_KEYS.settings), DEFAULT_SETTINGS, (value) => {
     if (!isRecord(value)) return DEFAULT_SETTINGS;
-    const allowedThemes: ThemeMode[] = ["auto", "morning", "day", "evening", "night"];
+    const allowedThemes: ThemeMode[] = ["classic", "auto", "morning", "day", "evening", "night"];
     return {
       ...DEFAULT_SETTINGS,
       themeMode: allowedThemes.includes(value.themeMode as ThemeMode) ? (value.themeMode as ThemeMode) : DEFAULT_SETTINGS.themeMode,
@@ -226,10 +226,7 @@ export function validateImportPayload(value: unknown): ExportPayload | null {
       startDate: typeof profile.startDate === "string" ? profile.startDate : todayKey(),
       createdAt: typeof profile.createdAt === "string" ? profile.createdAt : new Date().toISOString(),
     },
-    settings: {
-      ...DEFAULT_SETTINGS,
-      ...settings,
-    } as UserSettings,
+    settings: readSettingsFromImport(settings),
     dailyEntries: Object.entries(dailyEntries).reduce<Record<number, DailyEntry>>((acc, [key, entry]) => {
       const day = Number(key);
       if (!Number.isInteger(day) || day < 1 || day > 30 || !isRecord(entry)) return acc;
@@ -241,5 +238,21 @@ export function validateImportPayload(value: unknown): ExportPayload | null {
       } as DailyEntry;
       return acc;
     }, {}),
+  };
+}
+
+function readSettingsFromImport(settings: Record<string, unknown>): UserSettings {
+  const allowedThemes: ThemeMode[] = ["classic", "auto", "morning", "day", "evening", "night"];
+  return {
+    ...DEFAULT_SETTINGS,
+    themeMode: allowedThemes.includes(settings.themeMode as ThemeMode) ? (settings.themeMode as ThemeMode) : DEFAULT_SETTINGS.themeMode,
+    darkMode: typeof settings.darkMode === "boolean" ? settings.darkMode : DEFAULT_SETTINGS.darkMode,
+    fontScale: typeof settings.fontScale === "number" ? Math.min(1.2, Math.max(0.9, settings.fontScale)) : DEFAULT_SETTINGS.fontScale,
+    soundEnabled: typeof settings.soundEnabled === "boolean" ? settings.soundEnabled : DEFAULT_SETTINGS.soundEnabled,
+    vibrationEnabled: typeof settings.vibrationEnabled === "boolean" ? settings.vibrationEnabled : DEFAULT_SETTINGS.vibrationEnabled,
+    reduceMotion: typeof settings.reduceMotion === "boolean" ? settings.reduceMotion : DEFAULT_SETTINGS.reduceMotion,
+    reminderEnabled: typeof settings.reminderEnabled === "boolean" ? settings.reminderEnabled : DEFAULT_SETTINGS.reminderEnabled,
+    reminderTime: typeof settings.reminderTime === "string" ? settings.reminderTime : DEFAULT_SETTINGS.reminderTime,
+    demoMode: typeof settings.demoMode === "boolean" ? settings.demoMode : DEFAULT_SETTINGS.demoMode,
   };
 }
