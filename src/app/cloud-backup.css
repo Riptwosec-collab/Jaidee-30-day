@@ -1,0 +1,194 @@
+.cloud-backup-widget {
+  position: fixed;
+  top: max(76px, calc(env(safe-area-inset-top) + 76px));
+  right: max(148px, calc((100vw - 430px) / 2 + 148px));
+  z-index: 62;
+}
+
+.cloud-backup-trigger {
+  width: 52px;
+  height: 52px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  background: rgba(255, 255, 255, 0.68);
+  color: var(--primary) !important;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 16px 32px rgba(55, 38, 95, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(18px);
+}
+
+body[data-theme="night"] .cloud-backup-trigger,
+body.dark .cloud-backup-trigger {
+  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.13);
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+.cloud-backup-trigger svg {
+  color: inherit !important;
+  stroke-width: 2.35 !important;
+}
+
+.cloud-backup-panel {
+  position: absolute;
+  top: 62px;
+  right: 0;
+  width: min(390px, calc(100vw - 28px));
+  max-height: min(76dvh, 720px);
+  overflow-y: auto;
+  padding: 18px;
+  border-radius: 30px !important;
+}
+
+.cloud-backup-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.cloud-backup-header h2 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 22px;
+  font-weight: 950;
+}
+
+.cloud-backup-close {
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface-tile);
+  color: var(--text-primary);
+  display: grid;
+  place-items: center;
+}
+
+.cloud-backup-note,
+.cloud-backup-message,
+.cloud-backup-error {
+  margin-top: 12px;
+  border-radius: 22px;
+  padding: 12px;
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.cloud-backup-note {
+  color: var(--text-secondary) !important;
+  background: var(--surface-soft);
+}
+
+.cloud-backup-message {
+  color: var(--success, #2f7a57) !important;
+  background: rgba(107, 190, 143, 0.13);
+  border: 1px solid rgba(107, 190, 143, 0.25);
+}
+
+.cloud-backup-error {
+  color: var(--danger, #b83245) !important;
+  background: rgba(235, 88, 112, 0.12);
+  border: 1px solid rgba(235, 88, 112, 0.24);
+}
+
+.cloud-backup-status-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.cloud-backup-status-grid div {
+  min-height: 74px;
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  padding: 11px;
+  background: var(--surface-soft);
+}
+
+.cloud-backup-status-grid span,
+.cloud-backup-toggle small {
+  display: block;
+  color: var(--text-secondary) !important;
+  font-size: 11px;
+  font-weight: 850;
+}
+
+.cloud-backup-status-grid strong {
+  display: block;
+  margin-top: 6px;
+  color: var(--text-primary);
+  font-size: 13px;
+  line-height: 1.45;
+  word-break: break-word;
+}
+
+.cloud-backup-actions {
+  display: grid;
+  gap: 9px;
+  margin-top: 14px;
+}
+
+.cloud-backup-actions button {
+  min-height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.cloud-backup-actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.62;
+}
+
+.cloud-backup-toggle {
+  margin-top: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 13px;
+  background: var(--surface-soft);
+}
+
+.cloud-backup-toggle strong {
+  display: block;
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 950;
+}
+
+.cloud-backup-toggle input {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--primary);
+}
+
+@media (max-width: 430px) {
+  .cloud-backup-widget {
+    right: 142px;
+  }
+
+  .cloud-backup-panel {
+    position: fixed;
+    top: max(132px, calc(env(safe-area-inset-top) + 132px));
+    left: 14px;
+    right: 14px;
+    width: auto;
+  }
+}
+
+@media (max-width: 360px) {
+  .cloud-backup-widget {
+    right: 130px;
+  }
+
+  .cloud-backup-status-grid {
+    grid-template-columns: 1fr;
+  }
+}
